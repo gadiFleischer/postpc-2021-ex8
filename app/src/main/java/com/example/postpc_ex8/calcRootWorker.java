@@ -1,25 +1,66 @@
 package com.example.postpc_ex8;
-
 import android.content.Context;
-
 import androidx.annotation.NonNull;
 import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
+import org.jetbrains.annotations.Nullable;
 
 public class calcRootWorker extends Worker {
     private static final String PROGRESS = "PROGRESS";
-    private static final long DELAY = 1000L;
+    public static final int MAX_TIME = 200000;
+    private int cur_progress = 0;
+    Data.Builder dataBuilder;
 
     public calcRootWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         setProgressAsync(new Data.Builder().putInt(PROGRESS, 0).build());
     }
+    @Nullable
+    private boolean TimeIsUp(long timeStartMs, int id, long numToCalc, long currentNum) {
+        long nowTime = System.currentTimeMillis() - timeStartMs;
+        if (nowTime >= MAX_TIME) {
+            dataBuilder.putLong("numToCalc", numToCalc);
+            dataBuilder.putLong("currentNum", currentNum);
+            dataBuilder.putInt("id", id);
+            dataBuilder.putBoolean("retry", true);
+            return true;
+        }
+        return false;
+    }
+    private void updateProgressBar(long numToCalc, long currentNum){
+        int cur_prog = (int) ((currentNum / numToCalc) * 100);
+        if (cur_progress != cur_prog) {
+            cur_progress = cur_prog;
+            setProgressAsync(new Data.Builder().putInt(PROGRESS, cur_progress).build());
+        }
+    }
 
     @NonNull
-    @org.jetbrains.annotations.NotNull
     @Override
     public Result doWork() {
-        return null;
+        dataBuilder = new Data.Builder();
+        long timeStartMs = System.currentTimeMillis();
+        int id = getInputData().getInt("id", -1);
+        long numToCalc = getInputData().getLong("numToCalc", 0);
+        long currentNum = getInputData().getLong("currentNum", 2);
+        for (long i = 2; i < numToCalc / 2; i++) {
+            if(TimeIsUp(timeStartMs, id, numToCalc, currentNum)){
+                return Result.failure(dataBuilder.build());
+            }
+            updateProgressBar(numToCalc, currentNum);
+            if (numToCalc % i == 0) {
+                long root2 = numToCalc / i;
+                dataBuilder.putInt("id", id);
+                dataBuilder.putLong("root1", i);
+                dataBuilder.putLong("root2", root2);
+                return Result.success(dataBuilder.build());
+            }
+        }
+        dataBuilder.putInt("id", id);
+        dataBuilder.putDouble("numToCalc", numToCalc);
+        dataBuilder.putBoolean("retry", false);
+        return Result.failure(dataBuilder.build());
     }
+
 }
