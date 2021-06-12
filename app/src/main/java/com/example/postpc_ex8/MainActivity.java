@@ -9,12 +9,10 @@ import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import static android.widget.LinearLayout.VERTICAL;
@@ -52,9 +50,10 @@ public class MainActivity extends AppCompatActivity {
         buttonCreateCalc.setOnClickListener(view -> {
             try {
                 long numToCalc = Long.parseLong(insertNumberEditor.getText().toString());
-                Calculate curCalc = new Calculate(numToCalc);
-                StartCalc(curCalc, true);
-
+                if(!holder.findOldCalc(numToCalc)){
+                    Calculate curCalc = new Calculate(numToCalc);
+                    StartCalc(curCalc, true);
+                }
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
             }

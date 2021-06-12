@@ -38,13 +38,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull MyAdapter.ViewHolder holder, int position) {
         int pos = holder.getLayoutPosition();
         Calculate calc = this.holder.calcs.get(pos);
-        holder.TextCalc.setText(CalcToString(calc));
+        holder.TextCalc.setText(holder.CalcToString(calc));
         holder.deleteButton.setOnClickListener(view -> {
             if (calc.status==CalcStatus.InProgg) {
                 workManager.cancelWorkById(UUID.fromString(calc.workId));
             }
-            MyAdapter.this.holder.deleteCalc(calc);
-            notifyItemRangeRemoved(pos, 1);
+            this.holder.deleteCalc(calc);
+            notifyItemRangeRemoved(holder.getLayoutPosition(), 1);
         });
         changeProgressBar(holder, calc);
     }
@@ -92,17 +92,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         public void setProgBar(int progress) {
             ProgBar.setProgress(progress);
         }
-        private String CalcToString(Calculate calc) {
-            String res="";
+        public String CalcToString(Calculate calc) {
+            String res;
             switch(calc.status) {
                 case InProgg:
-                    res="Calculating roots for"+ calc.numberToCalc;
+                    res="Calculating roots for "+ calc.numberToCalc;
                     break;
                 case FinishedRoots:
                     res="Roots for "+calc.numberToCalc+":   "+calc.root1+"x"+calc.root2;
                     break;
                 case FinishedPrime:
-                    res="Roots for "+calc.numberToCalc+":   numer is prime";
+                    res="Roots for "+calc.numberToCalc+":   number is prime";
                     break;
                 default:
                     res="defualt";
@@ -110,22 +110,5 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             return res;
         }
 
-    }
-    private String CalcToString(Calculate calc) {
-        String res="";
-        switch(calc.status) {
-            case InProgg:
-                res="Calculating roots for"+ calc.numberToCalc;
-                break;
-            case FinishedRoots:
-                res="Roots for "+calc.numberToCalc+":   "+calc.root1+"x"+calc.root2;
-                break;
-            case FinishedPrime:
-                res="Roots for "+calc.numberToCalc+":   numer is prime";
-                break;
-            default:
-                res="defualt";
-        }
-        return res;
     }
 }
