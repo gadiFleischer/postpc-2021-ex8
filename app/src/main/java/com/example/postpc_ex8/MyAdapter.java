@@ -9,97 +9,108 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.work.WorkManager;
 
 import java.util.UUID;
 
-class MyViewHolder extends RecyclerView.ViewHolder {
-    TextView calculationRowRoot;
-    ImageView calculationRowDelete;
-//    ConstraintLayout calculationRow;
-    ProgressBar calculationRowProgress;
-    View view;
+public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+    public final WorkManager workManager;
+    public final CalcHolder holder;
+    public Context context;
 
 
-    public MyViewHolder(@NonNull View itemView) {
-        super(itemView);
-        this.view = itemView;
-        this.calculationRowRoot = itemView.findViewById(R.id.calculationRowRoot);
-        this.calculationRowDelete = itemView.findViewById(R.id.calculationRowDelete);
-//        this.calculationRow = itemView.findViewById(R.id.calculationRow);
-        this.calculationRowProgress = itemView.findViewById(R.id.calculationRowProgress);
-//        this.context = itemView.getContext();
-    }
-    public void SetCalcProg(int progress){
-        calculationRowProgress.setProgress(progress);
-    }
-
-    public void turnOffProgBar(){
-        calculationRowProgress.setVisibility(View.GONE);
-    }
-
-    public void turnOffDeleteButton(){
-//        calculationRowDelete.setBackground(AppCompatResources.getDrawable(context, R.drawable.ic_baseline_delete_24));
-    }
-
-    public void setRowText(String message){
-        calculationRowRoot.setText(message);
-    }
-}
-
-public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
-    public CalcHolder calcHolder;
-    LayoutInflater inflater;
-    private final WorkManager workManager;
-    MyViewHolder viewHolder;
-
-    public MyAdapter(Context context, CalcHolder holder, WorkManager workManager){
-        calcHolder = holder;
-        this.inflater = LayoutInflater.from(context);
+    public MyAdapter(CalcHolder calcHolder, WorkManager workManager) {
         this.workManager = workManager;
+        this.holder = calcHolder;
     }
 
     @NonNull
     @Override
-    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = inflater.inflate(R.layout.row_view, parent, false);
-        viewHolder= new MyViewHolder(view);
-        return this.viewHolder;
+    public MyAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        this.context = parent.getContext();
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_view, parent, false);
+        return new ViewHolder(view);
     }
 
-
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyAdapter.ViewHolder holder, int position) {
         int pos = holder.getLayoutPosition();
-        Calculate curCalc = calcHolder.calcs.get(pos);
-        holder.calculationRowRoot.setText(CalcToString(curCalc));
-
-        if(curCalc.status!=CalcStatus.InProgg){
-            holder.turnOffProgBar();
-//            holder.turnOffDeleteButton();
-        }
-        holder.calculationRowDelete.setOnClickListener(view -> {
-            if (curCalc.status==CalcStatus.InProgg){
-                workManager.cancelWorkById(UUID.fromString(curCalc.workId));
+        Calculate calc = this.holder.calcs.get(pos);
+        holder.TextCalc.setText(CalcToString(calc));
+        holder.deleteButton.setOnClickListener(view -> {
+            if (calc.status==CalcStatus.InProgg) {
+                workManager.cancelWorkById(UUID.fromString(calc.workId));
             }
-            calcHolder.deleteCalc(curCalc);
+            MyAdapter.this.holder.deleteCalc(calc);
             notifyItemRangeRemoved(pos, 1);
         });
-        if (curCalc.status==CalcStatus.InProgg){
-            holder.calculationRowProgress.setProgress(curCalc.progress);
-        }
-        else {
-            holder.calculationRowProgress.setVisibility(View.INVISIBLE);
-//            holder.calculationRowDelete.setBackground(AppCompatResources.getDrawable(context, R.drawable.ic_baseline_delete_24));
-        }
+        changeProgressBar(holder, calc);
     }
 
     @Override
     public int getItemCount() {
-        return calcHolder.calcs.size();
+        return holder.calcs.size();
     }
 
+    private void changeProgressBar(@NonNull ViewHolder holder, Calculate calc) {
+        switch (calc.status) {
+            case InProgg:
+                holder.ProgBar.setProgress(calc.progress);
+                break;
+            default:
+                holder.ProgBar.setVisibility(View.INVISIBLE);
+                break;
+        }
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        ConstraintLayout calculationRow;
+        TextView TextCalc;
+        ImageView deleteButton;
+        ProgressBar ProgBar;
+        Context context;
+        View view;
+
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            this.view = itemView;
+            this.calculationRow = itemView.findViewById(R.id.calculationRow);
+            this.TextCalc = itemView.findViewById(R.id.showNumberText);
+            this.deleteButton = itemView.findViewById(R.id.deleteButton);
+            this.ProgBar = itemView.findViewById(R.id.ShowProggView);
+            this.context = itemView.getContext();
+        }
+
+        public void SetViewsToComplete(Calculate calc) {
+            TextCalc.setText(CalcToString(calc));
+            ProgBar.setVisibility(View.GONE);
+        }
+
+        public void setProgBar(int progress) {
+            ProgBar.setProgress(progress);
+        }
+        private String CalcToString(Calculate calc) {
+            String res="";
+            switch(calc.status) {
+                case InProgg:
+                    res="Calculating roots for"+ calc.numberToCalc;
+                    break;
+                case FinishedRoots:
+                    res="Roots for "+calc.numberToCalc+":   "+calc.root1+"x"+calc.root2;
+                    break;
+                case FinishedPrime:
+                    res="Roots for "+calc.numberToCalc+":   numer is prime";
+                    break;
+                default:
+                    res="defualt";
+            }
+            return res;
+        }
+
+    }
     private String CalcToString(Calculate calc) {
         String res="";
         switch(calc.status) {
@@ -107,7 +118,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
                 res="Calculating roots for"+ calc.numberToCalc;
                 break;
             case FinishedRoots:
-                 res="Roots for "+calc.numberToCalc+":   "+calc.root1+"x"+calc.root2;
+                res="Roots for "+calc.numberToCalc+":   "+calc.root1+"x"+calc.root2;
                 break;
             case FinishedPrime:
                 res="Roots for "+calc.numberToCalc+":   numer is prime";

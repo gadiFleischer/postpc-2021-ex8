@@ -15,13 +15,6 @@ public class CalcHolder extends Activity {
         calcs=app.calcs;
     }
 
-//    public void updateCurCandidate(int pos, long curCandidate){
-//        calcs.get(pos).curCandidate = curCandidate;
-//        if (sp != null){
-//            saveItems();
-//        }
-//    }
-
     public void AddNewCalc(Calculate calc){
         calcs.add(calc);
         Collections.sort(calcs);
@@ -30,6 +23,7 @@ public class CalcHolder extends Activity {
 
     public void MarkCalcDone(Calculate calc,CalcStatus status){
         calc.status = status;
+        calc.progress=100;
         Collections.sort(calcs);
         app.saveTodoList(calcs);
     }

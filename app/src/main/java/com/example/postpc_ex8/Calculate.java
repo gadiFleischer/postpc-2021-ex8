@@ -1,7 +1,7 @@
 package com.example.postpc_ex8;
 
 import java.io.Serializable;
-
+import java.util.Random;
 enum CalcStatus {
     InProgg,
     FinishedRoots,
@@ -10,13 +10,13 @@ enum CalcStatus {
 
 public class Calculate implements Serializable, Comparable<Calculate> {
     public long numberToCalc;
+    public long currentNum;
     public long root1;
     public long root2;
     public CalcStatus status;
     public int id;
     public String workId;
     public int progress;
-    static int numOfItems = 0;
 
     public Calculate(long numberToCalc) {
         this.numberToCalc=numberToCalc;
@@ -24,9 +24,9 @@ public class Calculate implements Serializable, Comparable<Calculate> {
         this.root2=0;
         this.status=CalcStatus.InProgg;
         this.progress=0;
-        this.numOfItems+=1;
-        this.id=numOfItems;
+        this.id = new Random().nextInt(999999);
         this.workId="";
+        this.currentNum=2;
     }
 
     @Override

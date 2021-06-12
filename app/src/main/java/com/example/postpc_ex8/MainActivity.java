@@ -10,6 +10,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -27,23 +28,26 @@ public class MainActivity extends AppCompatActivity {
     public CalcHolder holder;
     public MyApp app;
     public Data.Builder dataBuilder;
+    Context context;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         insertNumberEditor = findViewById(R.id.insertNumberEditor);
         buttonCreateCalc = findViewById(R.id.CalcButton);
         recyclerRoots = findViewById(R.id.recyclerRoots);
-
+        context = MainActivity.this;
         app = new MyApp(this);
         holder = new CalcHolder(app);
-        dataBuilder = new Data.Builder();
-        adapter = new MyAdapter(this, holder, WorkManager.getInstance(this));
+        if(context!=null){
+            adapter = new MyAdapter(holder, WorkManager.getInstance(context));
+        }
         recyclerRoots.setAdapter(adapter);
         recyclerRoots.setLayoutManager(new LinearLayoutManager(this));
         recyclerRoots.addItemDecoration(new DividerItemDecoration(this, VERTICAL));
+        dataBuilder = new Data.Builder();
 
         buttonCreateCalc.setOnClickListener(view -> {
             try {
@@ -71,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
 
         dataBuilder.putInt("id", curCalc.id);
         dataBuilder.putLong("numToCalc", curCalc.numberToCalc);
-//        dataBuilder.putLong("current", curCalc.curCandidate);
+        dataBuilder.putLong("currentNum", curCalc.currentNum);
         OneTimeWorkRequest workRequest = new OneTimeWorkRequest.Builder(CalcRootWorker.class).setInputData(dataBuilder.build()).build();
         WorkManager.getInstance(this).enqueue(workRequest);
         curCalc.workId=workRequest.getId().toString();
@@ -105,6 +109,12 @@ public class MainActivity extends AppCompatActivity {
             calc.root2 = root2;
             holder.MarkCalcDone(calc,CalcStatus.FinishedRoots);
             adapter.notifyDataSetChanged();
+            int index = holder.getCalcIndex(calc);
+            MyAdapter.ViewHolder viewHolder = (MyAdapter.ViewHolder) recyclerRoots.
+                    findViewHolderForLayoutPosition(index);
+            if(viewHolder!=null){
+                viewHolder.SetViewsToComplete(calc);
+            }
         }
     }
     private boolean GotFail(Data output){
@@ -115,25 +125,31 @@ public class MainActivity extends AppCompatActivity {
         Calculate calc = holder.getCalcById(id);
         calc.status = CalcStatus.FinishedPrime;
         adapter.notifyDataSetChanged();
+        MyAdapter.ViewHolder viewHolder = (MyAdapter.ViewHolder)
+                recyclerRoots.findViewHolderForLayoutPosition(holder.getCalcIndex(calc));
+        if (viewHolder != null) {
+            viewHolder.SetViewsToComplete(calc);
+        }
         holder.MarkCalcDone(calc,CalcStatus.FinishedPrime);
         return false;
     }
     private void updateProgress(String workId, int progress){
-        for (Calculate calc : holder.calcs) {
-            if(calc.workId.equals(workId)){
-                calc.progress=progress;
+        for (int i = 0; i < holder.calcs.size(); i++) {
+            Calculate calc = holder.calcs.get(i);
+            if (calc.workId.equals(workId)) {
+                calc.progress = (progress);
+                MyAdapter.ViewHolder viewHolder =
+                        (MyAdapter.ViewHolder) recyclerRoots.findViewHolderForLayoutPosition(i);
+                if (viewHolder != null) {
+                    if (progress <= 1) {
+                        viewHolder.setProgBar(0); //check this
+                    }
+                    else if (progress >= 99) {
+                        viewHolder.setProgBar(100);
+                    }
+                    viewHolder.setProgBar(progress);
+                }
             }
         }
-
-
-//        for (int i = 0 ; i < holder.calcs.size(); i++){
-//            if (holder.calcs.get(i).workId != null && calcHolder.calculations.get(i).workId.equals(workId)){
-//                calcHolder.calculations.get(i).progress = progress;
-//                CalculationHolder.CalculationAdapter.ViewHolder viewHolder = (CalculationHolder.CalculationAdapter.ViewHolder) calcRecyclerView.findViewHolderForLayoutPosition(i);
-//                if (viewHolder != null){
-//                    viewHolder.setCalculationRowProgress(progress);
-//                }
-//            }
-//        }
     }
 }
