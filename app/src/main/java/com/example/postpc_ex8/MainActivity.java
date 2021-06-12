@@ -19,13 +19,13 @@ import static android.widget.LinearLayout.VERTICAL;
 import static java.util.jar.Pack200.Unpacker.PROGRESS;
 
 public class MainActivity extends AppCompatActivity {
-    public EditText insertNumberEditor;
-    public FloatingActionButton buttonCreateCalc;
-    public RecyclerView recyclerRoots;
-    public MyAdapter adapter;
-    public CalcHolder holder;
-    public MyApp app;
-    public Data.Builder dataBuilder;
+    EditText insertNumberEditor;
+    FloatingActionButton buttonCreateCalc;
+    RecyclerView recyclerRoots;
+    MyAdapter adapter;
+    CalcHolder holder;
+    MyApp app;
+    Data.Builder dataBuilder;
     Context context;
 
 
@@ -33,11 +33,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        context = MainActivity.this;
+        app = new MyApp(this);
+
+        //views
         insertNumberEditor = findViewById(R.id.insertNumberEditor);
         buttonCreateCalc = findViewById(R.id.CalcButton);
         recyclerRoots = findViewById(R.id.recyclerRoots);
-        context = MainActivity.this;
-        app = new MyApp(this);
+
+        //init recycler stuff
         holder = new CalcHolder(app);
         if(context!=null){
             adapter = new MyAdapter(holder, WorkManager.getInstance(context));
@@ -51,14 +55,13 @@ public class MainActivity extends AppCompatActivity {
             try {
                 long numToCalc = Long.parseLong(insertNumberEditor.getText().toString());
                 if(!holder.findOldCalc(numToCalc)){
-                    Calculate curCalc = new Calculate(numToCalc);
-                    StartCalc(curCalc, true);
+                    StartCalc(new Calculate(numToCalc), true);
                 }
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
             }
         });
-
+        //run in async with all other tasks
         for (Calculate calc : holder.calcs) {
             if (calc.status == CalcStatus.InProgg) {
                 StartCalc(calc, false);
@@ -86,42 +89,33 @@ public class MainActivity extends AppCompatActivity {
                     GotSuccess(workInfo1.getOutputData());
                 }
                 else if (state == WorkInfo.State.FAILED){
-                    boolean tryAgain = GotFail(workInfo1.getOutputData());
-                    if(tryAgain){
+                    if(GotFail(workInfo1.getOutputData())){
                         StartCalc(curCalc,false);
                     }
                 }
-                Data progress = workInfo1.getProgress();
-                int value = progress.getInt(PROGRESS, 0);
-                updateProgress(workInfo1.getId().toString(), value);
+                updateProgress(workInfo1.getId().toString(), workInfo1.getProgress().getInt(PROGRESS, 0));
             }
         });
     }
     private void GotSuccess(Data output){
-        int id = output.getInt("id", -1);
-        long root1 = output.getLong("root1", 0);
-        long root2 = output.getLong("root2", 0);
-
-        Calculate calc = holder.getCalcById(id);
+        Calculate calc = holder.getCalcById(output.getInt("id", -1));
         if(calc!=null){
-            calc.root1 = root1;
-            calc.root2 = root2;
+            calc.root1 =  output.getLong("root1", 0);
+            calc.root2 = output.getLong("root2", 0);
             holder.MarkCalcDone(calc,CalcStatus.FinishedRoots);
             adapter.notifyDataSetChanged();
-            int index = holder.getCalcIndex(calc);
             MyAdapter.ViewHolder viewHolder = (MyAdapter.ViewHolder) recyclerRoots.
-                    findViewHolderForLayoutPosition(index);
+                    findViewHolderForLayoutPosition(holder.getCalcIndex(calc));
             if(viewHolder!=null){
                 viewHolder.SetViewsToComplete(calc);
             }
         }
     }
     private boolean GotFail(Data output){
-        if(output.getBoolean("retry", true)){
+        if(output.getBoolean("continueCalc", true)){
             return true;
         }
-        int id = output.getInt("id", -1);
-        Calculate calc = holder.getCalcById(id);
+        Calculate calc = holder.getCalcById(output.getInt("id", -1));
         calc.status = CalcStatus.FinishedPrime;
         adapter.notifyDataSetChanged();
         MyAdapter.ViewHolder viewHolder = (MyAdapter.ViewHolder)
@@ -136,17 +130,17 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < holder.calcs.size(); i++) {
             Calculate calc = holder.calcs.get(i);
             if (calc.workId.equals(workId)) {
-                calc.progress = (progress);
+                calc.progress = progress;
                 MyAdapter.ViewHolder viewHolder =
                         (MyAdapter.ViewHolder) recyclerRoots.findViewHolderForLayoutPosition(i);
                 if (viewHolder != null) {
                     if (progress <= 1) {
-                        viewHolder.setProgBar(0); //check this
+                        viewHolder.ProgBar.setProgress(0);
                     }
                     else if (progress >= 99) {
-                        viewHolder.setProgBar(100);
+                        viewHolder.ProgBar.setProgress(100);
                     }
-                    viewHolder.setProgBar(progress);
+                    viewHolder.ProgBar.setProgress(progress);
                 }
             }
         }

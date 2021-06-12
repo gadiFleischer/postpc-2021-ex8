@@ -30,14 +30,9 @@ public class CalcHolder extends Activity {
 
     public void deleteCalc(Calculate calc)
     {
-        for (Calculate calcToDelete : calcs) {
-            if (calcToDelete.numberToCalc == calc.numberToCalc) {
-                calcs.remove(calcToDelete);
-                Collections.sort(calcs);
-                app.saveTodoList(calcs);
-                return;
-            }
-        }
+        calcs.remove(calc);
+        Collections.sort(calcs);
+        app.saveTodoList(calcs);
     }
     public boolean findOldCalc(long numberToCalc){
         for (Calculate calc : calcs) {
