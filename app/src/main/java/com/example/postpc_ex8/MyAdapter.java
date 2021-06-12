@@ -51,6 +51,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         switch (calc.status) {
             case InProgg:
                 holder.ProgBar.setProgress(calc.progress);
+                holder.TextCalc.setText(holder.CalcToString(calc));
                 break;
             default:
                 holder.ProgBar.setVisibility(View.INVISIBLE);
@@ -82,7 +83,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
             String res;
             switch(calc.status) {
                 case InProgg:
-                    res="Calculating roots for "+ calc.numberToCalc;
+                    res="Calculating roots for "+ calc.numberToCalc+" at :"+calc.progress +"% percent";
                     break;
                 case FinishedRoots:
                     res="Roots for "+calc.numberToCalc+":   "+calc.root1+"x"+calc.root2;

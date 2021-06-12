@@ -10,16 +10,14 @@
     <TextView
         android:id="@+id/showNumberText"
         android:layout_width="350dp"
-        android:layout_height="18dp"
+        android:layout_height="25dp"
         android:layout_marginLeft="16dp"
         android:gravity="top"
         android:text="Find roots"
-        android:textSize="15sp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="#00BCD4"
-
         app:layout_constraintVertical_bias="0.2" />
 
     <ImageButton
@@ -36,16 +34,27 @@
         app:srcCompat="@android:drawable/btn_dialog"
         android:layout_marginLeft="310dp" />
 
-
+<!--    <ProgressBar-->
+<!--        android:id="@+id/ShowProggView"-->
+<!--        android:progress="0"-->
+<!--        android:layout_width="330dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:layout_constraintRight_toLeftOf="@id/deleteButton"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/showNumberText"-->
+<!--        />-->
     <ProgressBar
         android:id="@+id/ShowProggView"
-        android:progress="0"
-        android:layout_width="330dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintRight_toLeftOf="@id/deleteButton"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/showNumberText"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="308dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="36dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.407"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:indeterminate="true"
         />
 
 

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class CalcRootWorker extends Worker {
     private static final String PROGRESS = "PROGRESS";
-    public static final int MAX_TIME = 200000;
+    public static final int MAX_TIME = 20000;
     private int cur_progress = 0;
     Data.Builder dataBuilder;
 
@@ -44,7 +44,7 @@ public class CalcRootWorker extends Worker {
         int id = getInputData().getInt("id", -1);
         long numToCalc = getInputData().getLong("numToCalc", 0);
         long currentNum = getInputData().getLong("currentNum", 2);
-        for (long i = 2; i < numToCalc / 2; i++) {
+        for (long i = currentNum; i < numToCalc / 2; i++) {
             if(TimeIsUp(timeStartMs, id, numToCalc, currentNum)){
                 return Result.failure(dataBuilder.build());
             }

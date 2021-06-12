@@ -141,8 +141,26 @@ public class MainActivity extends AppCompatActivity {
                         viewHolder.ProgBar.setProgress(100);
                     }
                     viewHolder.ProgBar.setProgress(progress);
+                    viewHolder.TextCalc.setText(CalcToString(calc));
                 }
             }
         }
+    }
+    public String CalcToString(Calculate calc) {
+        String res;
+        switch(calc.status) {
+            case InProgg:
+                res="Calculating roots for "+ calc.numberToCalc+" at :"+calc.progress +"% percent";
+                break;
+            case FinishedRoots:
+                res="Roots for "+calc.numberToCalc+":   "+calc.root1+"x"+calc.root2;
+                break;
+            case FinishedPrime:
+                res="Roots for "+calc.numberToCalc+":   number is prime";
+                break;
+            default:
+                res="error";
+        }
+        return res;
     }
 }
