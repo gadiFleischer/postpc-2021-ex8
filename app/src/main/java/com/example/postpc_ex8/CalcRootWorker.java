@@ -6,13 +6,13 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import org.jetbrains.annotations.Nullable;
 
-public class calcRootWorker extends Worker {
+public class CalcRootWorker extends Worker {
     private static final String PROGRESS = "PROGRESS";
     public static final int MAX_TIME = 200000;
     private int cur_progress = 0;
     Data.Builder dataBuilder;
 
-    public calcRootWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public CalcRootWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         setProgressAsync(new Data.Builder().putInt(PROGRESS, 0).build());
     }

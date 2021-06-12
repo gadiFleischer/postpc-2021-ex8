@@ -9,9 +9,10 @@ public class CalcHolder extends Activity {
     ArrayList<Calculate> calcs;
     MyApp app;
 
-    public CalcHolder() {
+    public CalcHolder(MyApp app) {
         calcs= new ArrayList<>();
-        app=new MyApp(this);
+        this.app=app;
+        calcs=app.calcs;
     }
 
 //    public void updateCurCandidate(int pos, long curCandidate){
@@ -21,8 +22,8 @@ public class CalcHolder extends Activity {
 //        }
 //    }
 
-    public void CreateCalculation(long numToCalc){
-        calcs.add(new Calculate(numToCalc));
+    public void AddNewCalc(Calculate calc){
+        calcs.add(calc);
         Collections.sort(calcs);
         app.saveTodoList(calcs);
     }
@@ -42,5 +43,12 @@ public class CalcHolder extends Activity {
     {
         return calcs.indexOf(calc);
     }
-
+    public Calculate getCalcById(int id){
+        for (Calculate calc : calcs) {
+            if (calc.id == id) {
+                return calc;
+            }
+        }
+        return null;
+    }
 }

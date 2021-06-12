@@ -15,7 +15,7 @@ public class Calculate implements Serializable, Comparable<Calculate> {
     public CalcStatus status;
     public int id;
     public String workId;
-    public int progress=0;
+    public int progress;
     static int numOfItems = 0;
 
     public Calculate(long numberToCalc) {
@@ -24,7 +24,9 @@ public class Calculate implements Serializable, Comparable<Calculate> {
         this.root2=0;
         this.status=CalcStatus.InProgg;
         this.progress=0;
-        numOfItems+=1;
+        this.numOfItems+=1;
+        this.id=numOfItems;
+        this.workId="";
     }
 
     @Override

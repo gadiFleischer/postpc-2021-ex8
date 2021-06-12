@@ -19,7 +19,6 @@ class MyViewHolder extends RecyclerView.ViewHolder {
     ImageView calculationRowDelete;
 //    ConstraintLayout calculationRow;
     ProgressBar calculationRowProgress;
-    Context context;
     View view;
 
 
@@ -30,7 +29,7 @@ class MyViewHolder extends RecyclerView.ViewHolder {
         this.calculationRowDelete = itemView.findViewById(R.id.calculationRowDelete);
 //        this.calculationRow = itemView.findViewById(R.id.calculationRow);
         this.calculationRowProgress = itemView.findViewById(R.id.calculationRowProgress);
-        this.context = itemView.getContext();
+//        this.context = itemView.getContext();
     }
     public void SetCalcProg(int progress){
         calculationRowProgress.setProgress(progress);
@@ -53,12 +52,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
     public CalcHolder calcHolder;
     LayoutInflater inflater;
     private final WorkManager workManager;
-    Context context;
+    MyViewHolder viewHolder;
 
     public MyAdapter(Context context, CalcHolder holder, WorkManager workManager){
         calcHolder = holder;
         this.inflater = LayoutInflater.from(context);
-        this.context=context;
         this.workManager = workManager;
     }
 
@@ -66,7 +64,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.row_view, parent, false);
-        return new MyViewHolder(view);
+        viewHolder= new MyViewHolder(view);
+        return this.viewHolder;
     }
 
 
@@ -75,6 +74,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
         int pos = holder.getLayoutPosition();
         Calculate curCalc = calcHolder.calcs.get(pos);
         holder.calculationRowRoot.setText(CalcToString(curCalc));
+
+        if(curCalc.status!=CalcStatus.InProgg){
+            holder.turnOffProgBar();
+//            holder.turnOffDeleteButton();
+        }
         holder.calculationRowDelete.setOnClickListener(view -> {
             if (curCalc.status==CalcStatus.InProgg){
                 workManager.cancelWorkById(UUID.fromString(curCalc.workId));
