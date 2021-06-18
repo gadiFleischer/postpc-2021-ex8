@@ -16,14 +16,17 @@ public class MyApp extends Application {
     public MyApp(Context context){
         this.context=context;
         sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-        loadTodoList();
+        loadCalcs();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        calcs = new ArrayList<>();
     }
-    public void loadTodoList() {
+
+
+    public void loadCalcs() {
         calcs =  new ArrayList<>();
         String itemsJson = sharedPref.getString("calcs", "");
         if (!itemsJson.equals("")) {
@@ -32,7 +35,7 @@ public class MyApp extends Application {
         }
     }
 
-    public void saveTodoList(ArrayList<Calculate> calcs) {
+    public void saveCalcs(ArrayList<Calculate> calcs) {
         this.calcs=calcs;
         String itemsJson = new Gson().toJson(calcs);
         sharedPref.edit().putString("calcs", itemsJson).apply();

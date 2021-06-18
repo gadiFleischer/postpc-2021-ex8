@@ -42,9 +42,10 @@ public class MainActivity extends AppCompatActivity {
         recyclerRoots = findViewById(R.id.recyclerRoots);
 
         //init recycler stuff
-        holder = new CalcHolder(app);
+        holder = new CalcHolder();
+        holder.calcs=app.calcs;
         if(context!=null){
-            adapter = new MyAdapter(holder, WorkManager.getInstance(context));
+            adapter = new MyAdapter(holder, WorkManager.getInstance(context),app);
         }
         recyclerRoots.setAdapter(adapter);
         recyclerRoots.setLayoutManager(new LinearLayoutManager(this));
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     private void StartCalc(Calculate curCalc, boolean isNew){
         if (isNew){
             holder.AddNewCalc(curCalc);
+            app.saveCalcs(holder.calcs);
             adapter.notifyItemInserted(holder.getCalcIndex(curCalc));
         }
 
@@ -103,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
             calc.root1 =  output.getLong("root1", 0);
             calc.root2 = output.getLong("root2", 0);
             holder.MarkCalcDone(calc,CalcStatus.FinishedRoots);
+            app.saveCalcs(holder.calcs);
             adapter.notifyDataSetChanged();
             MyAdapter.ViewHolder viewHolder = (MyAdapter.ViewHolder) recyclerRoots.
                     findViewHolderForLayoutPosition(holder.getCalcIndex(calc));
@@ -124,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
             viewHolder.SetViewsToComplete(calc);
         }
         holder.MarkCalcDone(calc,CalcStatus.FinishedPrime);
+        app.saveCalcs(holder.calcs);
         return false;
     }
     private void updateProgress(String workId, int progress){

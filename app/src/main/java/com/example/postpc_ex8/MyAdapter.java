@@ -15,10 +15,12 @@ import java.util.UUID;
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public WorkManager workManager;
     public CalcHolder holder;
+    MyApp app;
 
-    public MyAdapter(CalcHolder calcHolder, WorkManager workManager) {
+    public MyAdapter(CalcHolder calcHolder, WorkManager workManager,MyApp app) {
         this.workManager = workManager;
         this.holder = calcHolder;
+        this.app=app;
     }
 
     @NonNull
@@ -37,6 +39,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
                 workManager.cancelWorkById(UUID.fromString(calc.workId));
             }
             this.holder.deleteCalc(calc);
+            app.saveCalcs(this.holder.calcs);
             notifyItemRangeRemoved(holder.getLayoutPosition(), 1);
         });
         changeProgressBar(holder, calc);

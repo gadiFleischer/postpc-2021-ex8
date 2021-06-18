@@ -7,32 +7,26 @@ import java.util.Collections;
 public class CalcHolder extends Activity {
 
     ArrayList<Calculate> calcs;
-    MyApp app;
 
-    public CalcHolder(MyApp app) {
+    public CalcHolder() {
         calcs= new ArrayList<>();
-        this.app=app;
-        calcs=app.calcs;
     }
 
     public void AddNewCalc(Calculate calc){
         calcs.add(calc);
         Collections.sort(calcs);
-        app.saveTodoList(calcs);
     }
 
     public void MarkCalcDone(Calculate calc,CalcStatus status){
         calc.status = status;
         calc.progress=100;
         Collections.sort(calcs);
-        app.saveTodoList(calcs);
     }
 
     public void deleteCalc(Calculate calc)
     {
         calcs.remove(calc);
         Collections.sort(calcs);
-        app.saveTodoList(calcs);
     }
     public boolean findOldCalc(long numberToCalc){
         for (Calculate calc : calcs) {
