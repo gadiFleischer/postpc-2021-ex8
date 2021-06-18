@@ -91,11 +91,17 @@ public class MainActivity extends AppCompatActivity {
                     GotSuccess(workInfo1.getOutputData());
                 }
                 else if (state == WorkInfo.State.FAILED){
-                    if(GotFail(workInfo1.getOutputData())){
+                    Data output = workInfo1.getOutputData();
+                    if(GotFail(output)){
+                        curCalc.currentNum= output.getLong("currentNum", 2);
+                        curCalc.progress=output.getInt("prog", 0);
+                        holder.calcs.set(holder.getCalcIndex(curCalc),curCalc);
+                        updateProgress(workInfo1.getId().toString(), output.getInt("prog", 0));
+                        app.saveCalcs(holder.calcs);
                         StartCalc(curCalc,false);
                     }
                 }
-                updateProgress(workInfo1.getId().toString(), workInfo1.getProgress().getInt(PROGRESS, 0));
+//                updateProgress(workInfo1.getId().toString(), workInfo1.getOutputData().getInt("prog", 0));
             }
         });
     }
@@ -113,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
                 viewHolder.SetViewsToComplete(calc);
             }
         }
+
     }
     private boolean GotFail(Data output){
         if(output.getBoolean("continueCalc", true)){

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class CalcRootWorker extends Worker {
     private static final String PROGRESS = "PROGRESS";
-    public static final int MAX_TIME = 20000;
+    public static final int MAX_TIME = 5000;
     private int cur_progress = 0;
     Data.Builder dataBuilder;
 
@@ -29,7 +29,7 @@ public class CalcRootWorker extends Worker {
         return false;
     }
     private void updateProgressBar(long numToCalc, long currentNum){
-        int cur_prog = (int) ((currentNum / numToCalc) * 100);
+        int cur_prog = (int)(currentNum * 100.0 / numToCalc + 0.5);
         if (cur_progress != cur_prog) {
             cur_progress = cur_prog;
             setProgressAsync(new Data.Builder().putInt(PROGRESS, cur_progress).build());
@@ -46,14 +46,18 @@ public class CalcRootWorker extends Worker {
         long currentNum = getInputData().getLong("currentNum", 2);
         for (long i = currentNum; i < numToCalc / 2; i++) {
             if(TimeIsUp(timeStartMs, id, numToCalc, currentNum)){
+                updateProgressBar(numToCalc, i);
+                dataBuilder.putLong("currentNum", i);
+                dataBuilder.putBoolean("continueCalc", true);
+                dataBuilder.putInt("prog", cur_progress);
                 return Result.failure(dataBuilder.build());
             }
-            updateProgressBar(numToCalc, currentNum);
             if (numToCalc % i == 0) {
                 dataBuilder.putInt("id", id);
                 dataBuilder.putLong("root1", i);
                 dataBuilder.putLong("root2",numToCalc / i);
                 dataBuilder.putLong("numToCalc", numToCalc);
+                dataBuilder.putInt("prog", cur_progress);
                 return Result.success(dataBuilder.build());
             }
         }
